@@ -10,7 +10,7 @@ def _write(level: str, message: str):
     if LEVELS[level] < LEVELS[CURRENT_LEVEL]:
         return
 
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
     line = f"{timestamp} [{level}] {message}\n"
 
     sys.stdout.write(line)

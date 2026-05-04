@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 PORT = int(os.environ.get("PORT", 8080))
 HOST = os.environ.get("HOST", "0.0.0.0")
 
@@ -12,5 +14,5 @@ if not API_KEY:
 
 API_KEY_HEADER = "x-api-key"
 
-LOG_FILE = os.environ.get("LOG_FILE", "server.log")
-STATIC_DIR = os.environ.get("STATIC_DIR", "static")
+LOG_FILE = os.path.join(BASE_DIR, "server.log")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
