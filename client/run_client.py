@@ -4,7 +4,7 @@ import os
 import sys
 import textwrap
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, (os.path.dirname(__file__), ".."))
 
 from client.client import HTTPClient, HTTPResponse
 
@@ -113,7 +113,7 @@ def _command_line_interface(api_key):
                     pass
 
                 if lines:
-                    raw_body = "\n".joins(lines)
+                    raw_body = "\n".join(lines)
                     body = raw_body.encode("utf-8")
                     if "content-type" not in {k.lower() for k in headers}:
                         try:
@@ -147,12 +147,12 @@ def main():
             name, _, value = h.partition(":")
             extra_headers[name.strip()] = value.strip()
 
-        body = args.body.encode("utf-8") if args.body else b""
+    body = args.body.encode("utf-8") if args.body else b""
 
-        if args.method and args.url:
-            _run_once(args.method.upper(), args.url, extra_headers, body, args.api_key)
-        else:
-            _command_line_interface(args.api_key)
+    if args.method and args.url:
+        _run_once(args.method.upper(), args.url, extra_headers, body, args.api_key)
+    else:
+        _command_line_interface(args.api_key)
 
 
 

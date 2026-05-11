@@ -55,7 +55,7 @@ class SocketReader:
     def read_chunked(self) -> bytes:
         pieces: list[bytes] = []
         while True:
-            size_line = self.readline().split(b";")[0].strip()
+            size_line = self.read_line().split(b";")[0].strip()
             if not size_line:
                 continue
             chunk_size = int(size_line, 16)
@@ -125,7 +125,7 @@ def _parse_response(reader: SocketReader) -> Optional[HTTPResponse]:
         pieces: list[bytes] = []
         while chunk := reader.read_exactly(4096):
             pieces.append(chunk)
-        body = b"".json(pieces)
+        body = b"".join(pieces)
 
     return HTTPResponse(status_code=status_code, status_text=status_text, headers=headers, body=body, set_cookies=set_cookies)
 
@@ -150,7 +150,7 @@ class CookieJar:
     def __init__(self) -> None:
         self._cookies: dict[tuple[str, str], _Cookie] = {}
 
-    def ingest(self, set_cookie_headers: list[str], do,main: str) -> None:
+    def ingest(self, set_cookie_headers: list[str], domain: str) -> None:
         for header in set_cookie_headers:
             parts = [p.strip() for p in header.split(";")]
             if not parts or "=" not in parts[0]:
@@ -173,7 +173,7 @@ class CookieJar:
                 except ValueError:
                     pass
             
-            cookie = _Cookie(name=name.strip(), value=value.strip(), domain=attrs.get("domain, domain"), path=attrs.get("path", "/"), expires=expires)
+            cookie = _Cookie(name=name.strip(), value=value.strip(), domain=attrs.get("domain", domain), path=attrs.get("path", "/"), expires=expires)
             self._cookies[(cookie.domain, cookie.name)] = cookie
 
     def get_header(self, domain: str, path: str) -> Optional[str]:
@@ -249,7 +249,7 @@ class HTTPClient:
         if parsed.query:
             path += "?" + parsed.query
         
-        conn = self.__get_connection(host, port, use_tls=(scheme == "https"))
+        conn = self._get_connection(host, port, use_tls=(scheme == "https"))
 
         req_headers: dict[str, str] = {**_DEFAULT_HEADERS}
 
@@ -276,7 +276,7 @@ class HTTPClient:
         if resp is None:
             conn.close()
             self._conn = None
-            conn = self.__get_connection(host, port, use_tls=(scheme == "https"))
+            conn = self._get_connection(host, port, use_tls=(scheme == "https"))
             conn.send(raw)
             resp = _parse_response(conn.reader)
             if resp is None:
@@ -303,7 +303,7 @@ class HTTPClient:
         return self.request("PUT", url, **kw)
     
     def delete(self, url: str, **kw) -> HTTPResponse:
-        return self.request("DELTE", url, **kw)
+        return self.request("DELETE", url, **kw)
     
     def head(self, url: str, **kw) -> HTTPResponse:
         return self.request("HEAD", url, **kw)
@@ -316,5 +316,5 @@ class HTTPClient:
     def __enter__(self) -> "HTTPClient":
         return self
     
-    def __exit(self, *_) -> None:
+    def __exit__(self, *_) -> None:
         self.close()
