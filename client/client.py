@@ -270,7 +270,14 @@ class HTTPClient:
             req_headers.update(headers)
 
         raw = _build_request(method.upper(), path, req_headers, body or b"")
-        conn.send(raw)
+
+        try:
+            conn.send(raw)
+        except OSError:
+            conn.close()
+            self._conn = None
+            conn = self._get_connection(host, port, use_tls=(scheme == "https"))
+            conn.send(raw)
 
         resp = _parse_response(conn.reader)
         if resp is None:

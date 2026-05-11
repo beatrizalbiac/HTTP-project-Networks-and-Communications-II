@@ -51,7 +51,7 @@ class HTTPResponse:
             body_bytes = self._encode_chunked(self.body)
         else:
             lines.append(f"Content-Length: {len(self.body)}")
-            body_byes = self.body
+            body_bytes = self.body
 
         lines.append("Connection: keep-alive")
 

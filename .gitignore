@@ -210,3 +210,4 @@ __marimo__/
 body.json
 server.log
 server/server.log
+.pytest_cache
