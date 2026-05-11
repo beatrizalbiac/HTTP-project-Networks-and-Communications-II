@@ -65,6 +65,9 @@ def _command_line_interface(api_key):
     print(" Write 'exit' or press Ctrl-C to leave")
     print("=" * 60)
 
+    if not api_key:
+        api_key = input("\n API Key: ").strip()
+
     client = HTTPClient(api_key=api_key)
 
     try:
