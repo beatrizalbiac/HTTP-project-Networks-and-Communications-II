@@ -19,28 +19,31 @@ class Router:
         self._routes.append((method.upper(), re.compile(pattern), param_names, handler))
 
     def dispatch(self, request: HTTPRequest) -> HTTPResponse:
-        path_matched = False
+        meth_allowed: list[str] = []
 
         for method, pattern, param_names, handler in self._routes:
             match = pattern.match(request.path)
-            if match:
-                path_matched = True
-                if request.method != method:
-                    continue
+            if not match:
+                continue
 
-                params = dict(zip(param_names, match.groups()))
+            meth_allowed.append(method)
+            if request.method != method:
+                continue
 
-                for middleware in self._middlewares:
-                    result = middleware(request)
-                    if isinstance(result, HTTPResponse):
-                        return result
+            params = dict(zip(param_names, match.groups()))
 
-                try:
-                    return handler(request, **params)
-                except Exception as e:
-                    logger.error(f"Handler error: {e}", exc_info=True)
-                    return HTTPResponse(500, {"error": "Internal server error"})
+            for middleware in self._middlewares:
+                result = middleware(request)
+                if isinstance(result, HTTPResponse):
+                    return result
 
-        if path_matched:
-            return HTTPResponse.method_not_allowed()
+            try:
+                return handler(request, **params)
+            except Exception as e:
+                logger.error(f"Handler error: {e}", exc_info=True)
+                return HTTPResponse(500, {"error": "Internal server error"})
+
+        if meth_allowed:
+            return HTTPResponse.method_not_allowed(meth_allowed)
+        
         return HTTPResponse.not_found()

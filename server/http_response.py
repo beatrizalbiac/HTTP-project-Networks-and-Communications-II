@@ -76,8 +76,11 @@ class HTTPResponse:
         return cls(400, {"error": message})
 
     @classmethod
-    def method_not_allowed(cls):
-        return cls(405, {"error": "Method not allowed"})
+    def method_not_allowed(cls, meths_allowed: list[str] = None):
+        headers = {}
+        if meths_allowed:
+            headers["Allow"] = ", ".join(sorted(set(meths_allowed)))
+        return cls(405, {"error": "Method not allowed"}, headers=headers)
 
     @classmethod
     def unauthorized(cls):
