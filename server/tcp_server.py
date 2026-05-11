@@ -5,6 +5,7 @@ from http_response import HTTPResponse
 from router import Router
 from logger import logger
 
+_CHUNKED_THRESHOLD = 512
 
 class TCPServer:
     def __init__(self, router: Router, host: str, port: int):
@@ -49,7 +50,9 @@ class TCPServer:
                     response = self.router.dispatch(request)
                     logger.info(f"{request.method} {request.path} → {response.status}")
 
-                conn.sendall(response.to_bytes())
+                use_chunked = len(response.body) > _CHUNKED_THRESHOLD
+                
+                conn.sendall(response.to_bytes(use_chunked=use_chunked))
 
                 connection_header = ""
                 if request:
