@@ -47,11 +47,11 @@ class HTTPResponse:
         no_body_status = self.status in (204, 304)
 
         if use_chunked and not no_body_status and self.body:
-            lines.append("Transfer-Enconding: chunked")
+            lines.append("Transfer-Encoding: chunked")
             body_bytes = self._encode_chunked(self.body)
         else:
             lines.append(f"Content-Length: {len(self.body)}")
-            lines.append("Connection: keep-alive")
+            body_byes = self.body
 
         lines.append("Connection: keep-alive")
 
@@ -62,7 +62,7 @@ class HTTPResponse:
             lines.append(f"Set-Cookie: {cookie}")
 
         header_str = "\r\n".join(lines) + "\r\n\r\n"
-        return header_str.encode("utf-8") + self.body
+        return header_str.encode("utf-8") + body_bytes
 
     # just for the ones that the assingment requires
     @classmethod
@@ -96,6 +96,7 @@ class HTTPResponse:
     def unauthorized(cls):
         return cls(401, {"error": "Unauthorized"})
     
+    @staticmethod
     def _encode_chunked(data: bytes) -> bytes:
         parts: list[bytes] = []
 
