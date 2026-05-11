@@ -21,6 +21,8 @@ def build_router() -> Router:
     router.add("POST",   "/bunnies",      bunny.create)
     router.add("PUT",    "/bunnies/:id",  bunny.update)
     router.add("DELETE", "/bunnies/:id",  bunny.delete)
+    router.add("HEAD", "/bunnies",     bunny.get_all)
+    router.add("HEAD", "/bunnies/:id", bunny.get_one)
 
     return router
 
