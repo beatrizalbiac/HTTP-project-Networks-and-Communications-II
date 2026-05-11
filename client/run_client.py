@@ -4,9 +4,9 @@ import os
 import sys
 import textwrap
 
-sys.path.insert(0, (os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(__file__))
 
-from client.client import HTTPClient, HTTPResponse
+from client import HTTPClient, HTTPResponse
 
 _COLOR_GREEN  = "\033[92m"
 _COLOR_YELLOW = "\033[93m"
