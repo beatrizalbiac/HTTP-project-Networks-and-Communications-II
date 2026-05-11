@@ -1,3 +1,5 @@
+import time
+
 from http_parser import HTTPRequest
 from http_response import HTTPResponse
 from config import API_KEY, API_KEY_HEADER
@@ -15,8 +17,7 @@ def api_key_middleware(request: HTTPRequest):
         logger.warning(f"Unauthorized request to {request.path}")
         return HTTPResponse.unauthorized()
 
-    return None
-
 
 def logging_middleware(request: HTTPRequest):
-    return None
+    logger.info(f"{request.method} {request.path}")
+    request._received_at = time.time()
