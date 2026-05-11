@@ -13,6 +13,7 @@ STATUS_TEXTS = {
     500: "Internal Server Error",
 }
 
+_CHUNK_SIZE = 512
 
 class HTTPResponse:
     def __init__(self, status: int, body=None, content_type: str = "application/json", headers: dict = None):
@@ -36,13 +37,22 @@ class HTTPResponse:
             cookie += f"; Max-Age={max_age}"
         self._cookies.append(cookie)
 
-    def to_bytes(self) -> bytes:
+    def to_bytes(self, use_chunked: bool = False) -> bytes:
         reason = STATUS_TEXTS.get(self.status, "Unknown")
         lines = [f"HTTP/1.1 {self.status} {reason}"]
 
         if self.body:
             lines.append(f"Content-Type: {self.content_type}")
-        lines.append(f"Content-Length: {len(self.body)}")
+
+        no_body_status = self.status in (204, 304)
+
+        if use_chunked and not no_body_status and self.body:
+            lines.append("Transfer-Enconding: chunked")
+            body_bytes = self._encode_chunked(self.body)
+        else:
+            lines.append(f"Content-Length: {len(self.body)}")
+            lines.append("Connection: keep-alive")
+
         lines.append("Connection: keep-alive")
 
         for k, v in self.extra_headers.items():
@@ -85,3 +95,15 @@ class HTTPResponse:
     @classmethod
     def unauthorized(cls):
         return cls(401, {"error": "Unauthorized"})
+    
+    def _encode_chunked(data: bytes) -> bytes:
+        parts: list[bytes] = []
+
+        for i in range(0, len(data), _CHUNK_SIZE):
+            chunk = data[i : i + _CHUNK_SIZE]
+            parts.append(f"{len(chunk):x}\r\n".encode())
+            parts.append(chunk)
+            parts.append(b"\r\n")
+
+        parts.append(b"0\r\n\r\n")
+        return b"".join(parts)
