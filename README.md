@@ -47,6 +47,8 @@ echo "PORT=8080" >> .env
 echo "HOST=127.0.0.1" >>> .env
 ```
 
+You might need to close and re-open the IDE (e.g. Visual Studio) you're using for it to work
+
 **5. Run the server**
 ```
 python server/main.py
@@ -58,4 +60,9 @@ python client/run_client.py
 ```
 ```
 python client/gui_client.py
+```
+
+**7. To run the automated testing**
+```
+pytest server/tests/test_bunnies.py -v
 ```
