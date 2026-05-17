@@ -1,5 +1,3 @@
-# REVISAR
-
 import json
 
 class HTTPRequest:
