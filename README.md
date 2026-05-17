@@ -61,3 +61,8 @@ python client/run_client.py
 ```
 python client/gui_client.py
 ```
+
+**7. To run the automated testing**
+```
+pytest server/tests/test_bunnies.py -v
+```
